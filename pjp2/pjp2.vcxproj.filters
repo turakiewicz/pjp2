@@ -28,6 +28,9 @@
     <Filter Include="Resource Files\graphics\betting">
       <UniqueIdentifier>{c9e0221a-f24d-406c-9370-a55dbb10afcb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resource Files\graphics\instructions">
+      <UniqueIdentifier>{9dea6e5e-b263-49bc-895a-e1f7605e74ec}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.c">
@@ -35,104 +38,8 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\graphics\start\background.png">
+    <Image Include="graphics\start\background.png">
       <Filter>Resource Files\graphics\start</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\start\exit.png">
-      <Filter>Resource Files\graphics\start</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\start\instructions.png">
-      <Filter>Resource Files\graphics\start</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\start\newGame.png">
-      <Filter>Resource Files\graphics\start</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\start\sound.png">
-      <Filter>Resource Files\graphics\start</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\race\background.png">
-      <Filter>Resource Files\graphics\race</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\race\box1.png">
-      <Filter>Resource Files\graphics\race</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\race\box2.png">
-      <Filter>Resource Files\graphics\race</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\race\box3.png">
-      <Filter>Resource Files\graphics\race</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\race\box4.png">
-      <Filter>Resource Files\graphics\race</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\race\box5.png">
-      <Filter>Resource Files\graphics\race</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\race\box6.png">
-      <Filter>Resource Files\graphics\race</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\race\horse01.png">
-      <Filter>Resource Files\graphics\race</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\race\horse02.png">
-      <Filter>Resource Files\graphics\race</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\race\horse03.png">
-      <Filter>Resource Files\graphics\race</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\race\horse04.png">
-      <Filter>Resource Files\graphics\race</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\race\horse05.png">
-      <Filter>Resource Files\graphics\race</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\race\horse06.png">
-      <Filter>Resource Files\graphics\race</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\stables\background.png">
-      <Filter>Resource Files\graphics\stables</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\stables\privHorse01.png">
-      <Filter>Resource Files\graphics\stables</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\stables\privHorse02.png">
-      <Filter>Resource Files\graphics\stables</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\stables\privHorse03.png">
-      <Filter>Resource Files\graphics\stables</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\stables\privHorse04.png">
-      <Filter>Resource Files\graphics\stables</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\stables\privHorse05.png">
-      <Filter>Resource Files\graphics\stables</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\stables\privHorse06.png">
-      <Filter>Resource Files\graphics\stables</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\betting\background.png">
-      <Filter>Resource Files\graphics\betting</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\betting\horse01.png">
-      <Filter>Resource Files\graphics\betting</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\betting\horse02.png">
-      <Filter>Resource Files\graphics\betting</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\betting\horse03.png">
-      <Filter>Resource Files\graphics\betting</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\betting\horse04.png">
-      <Filter>Resource Files\graphics\betting</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\betting\horse05.png">
-      <Filter>Resource Files\graphics\betting</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\betting\horse06.png">
-      <Filter>Resource Files\graphics\betting</Filter>
-    </Image>
-    <Image Include="..\..\..\graphics\betting\star.png">
-      <Filter>Resource Files\graphics\betting</Filter>
     </Image>
   </ItemGroup>
 </Project>

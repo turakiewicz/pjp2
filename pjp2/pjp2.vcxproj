@@ -44,9 +44,11 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>allegro-5.0.10-monolith-mt-debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -67,39 +69,7 @@
     <ClCompile Include="main.c" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\graphics\betting\background.png" />
-    <Image Include="..\..\..\graphics\betting\horse01.png" />
-    <Image Include="..\..\..\graphics\betting\horse02.png" />
-    <Image Include="..\..\..\graphics\betting\horse03.png" />
-    <Image Include="..\..\..\graphics\betting\horse04.png" />
-    <Image Include="..\..\..\graphics\betting\horse05.png" />
-    <Image Include="..\..\..\graphics\betting\horse06.png" />
-    <Image Include="..\..\..\graphics\betting\star.png" />
-    <Image Include="..\..\..\graphics\race\background.png" />
-    <Image Include="..\..\..\graphics\race\box1.png" />
-    <Image Include="..\..\..\graphics\race\box2.png" />
-    <Image Include="..\..\..\graphics\race\box3.png" />
-    <Image Include="..\..\..\graphics\race\box4.png" />
-    <Image Include="..\..\..\graphics\race\box5.png" />
-    <Image Include="..\..\..\graphics\race\box6.png" />
-    <Image Include="..\..\..\graphics\race\horse01.png" />
-    <Image Include="..\..\..\graphics\race\horse02.png" />
-    <Image Include="..\..\..\graphics\race\horse03.png" />
-    <Image Include="..\..\..\graphics\race\horse04.png" />
-    <Image Include="..\..\..\graphics\race\horse05.png" />
-    <Image Include="..\..\..\graphics\race\horse06.png" />
-    <Image Include="..\..\..\graphics\stables\background.png" />
-    <Image Include="..\..\..\graphics\stables\privHorse01.png" />
-    <Image Include="..\..\..\graphics\stables\privHorse02.png" />
-    <Image Include="..\..\..\graphics\stables\privHorse03.png" />
-    <Image Include="..\..\..\graphics\stables\privHorse04.png" />
-    <Image Include="..\..\..\graphics\stables\privHorse05.png" />
-    <Image Include="..\..\..\graphics\stables\privHorse06.png" />
-    <Image Include="..\..\..\graphics\start\background.png" />
-    <Image Include="..\..\..\graphics\start\exit.png" />
-    <Image Include="..\..\..\graphics\start\instructions.png" />
-    <Image Include="..\..\..\graphics\start\newGame.png" />
-    <Image Include="..\..\..\graphics\start\sound.png" />
+    <Image Include="graphics\start\background.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
