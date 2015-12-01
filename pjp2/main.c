@@ -6,9 +6,10 @@
 
 #include<stdlib.h>
 #include<stdio.h>
+#include<time.h>
 
 int main() {
-	
+
 //Initializing
 	if (!al_init()) {
 		al_show_native_message_box(NULL, NULL, NULL, "Cannot initialize Allegro!", NULL, NULL);
@@ -28,20 +29,43 @@ int main() {
 	}
 
 //Declaring
+	int i, j;
 	const float FPS = 60.0f;
+	srand(time(NULL));
+	int layout = 1;
+	bool sounds = true, gameDone = false, draw = true;
+	int winner;
+	//Horses levels
+	int hLevel[6];
+	for (i = 0; i < 6; i++) {
+		hLevel[i] = rand() % 6 + 1;
+	}
 
 	ALLEGRO_EVENT_QUEUE *event_queue = al_create_event_queue();
 	ALLEGRO_EVENT events;
 	ALLEGRO_DISPLAY *display = al_create_display(640, 360);
 	ALLEGRO_TIMER *timer = al_create_timer(1.0 / FPS);
 	ALLEGRO_FONT *font1 = al_load_font("res/fonts/AmericanCaptain.ttf", 20, NULL);
+	//Start layout graphics
 	ALLEGRO_BITMAP *startBackground = al_load_bitmap("res/graphics/start/background.png");
+	//Betting layout graphics
 	ALLEGRO_BITMAP *bettingBackground = al_load_bitmap("res/graphics/betting/background.png");
+	//Instructions layout graphics
 	ALLEGRO_BITMAP *instructionsBackground = al_load_bitmap("res/graphics/instructions/background.png");
-
-	int layout = 1;
-	bool sounds = true;
-	bool gameDone = false;
+	//Race layout graphics
+	ALLEGRO_BITMAP *raceBackground = al_load_bitmap("res/graphics/race/background.png");
+	ALLEGRO_BITMAP *box1 = al_load_bitmap("res/graphics/race/box1.png");
+	ALLEGRO_BITMAP *box2 = al_load_bitmap("res/graphics/race/box2.png");
+	ALLEGRO_BITMAP *box3 = al_load_bitmap("res/graphics/race/box3.png");
+	ALLEGRO_BITMAP *box4 = al_load_bitmap("res/graphics/race/box4.png");
+	ALLEGRO_BITMAP *box5 = al_load_bitmap("res/graphics/race/box5.png");
+	ALLEGRO_BITMAP *box6 = al_load_bitmap("res/graphics/race/box6.png");
+	ALLEGRO_BITMAP *horse01 = al_load_bitmap("res/graphics/race/horse01.png");
+	ALLEGRO_BITMAP *horse02 = al_load_bitmap("res/graphics/race/horse02.png");
+	ALLEGRO_BITMAP *horse03 = al_load_bitmap("res/graphics/race/horse03.png");
+	ALLEGRO_BITMAP *horse04 = al_load_bitmap("res/graphics/race/horse04.png");
+	ALLEGRO_BITMAP *horse05 = al_load_bitmap("res/graphics/race/horse05.png");
+	ALLEGRO_BITMAP *horse06 = al_load_bitmap("res/graphics/race/horse06.png");
 
 //Registering event sources
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
@@ -49,7 +73,6 @@ int main() {
 	al_register_event_source(event_queue, al_get_timer_event_source(timer));
 	
 //Reading high scores from file
-	int i, j;
 	//Loading scoreList.txt
 	FILE *fp;
 	char scoreList[101];
@@ -174,6 +197,13 @@ int main() {
 					printf("Layout: 1\n");
 				}
 			}
+
+			if (events.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+				if (events.mouse.button & 1) {
+					layout = 4;
+					printf("Layout: 4\n");
+				}
+			}
 		}
 
 	//Instructions layout
@@ -190,7 +220,72 @@ int main() {
 			}
 		}
 
+	//Race layout
+		if (layout == 4) {
+			bool raceDone = false;
+			bool race = true;
+			float hPosX[6], hPosY[6];
+			float bPosY[6];
 
+			for (i = 0; i < 6; i++) {
+				hPosX[i] = 20;
+				hPosY[i] = 280 - 30 * i;
+				bPosY[i] = 300 - 30 * i;
+			}
+
+			while (!raceDone) {
+				al_wait_for_event(event_queue, &events);
+				if (events.type == ALLEGRO_EVENT_KEY_DOWN) {
+					if (events.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+						layout = 2;
+						printf("Layout: 2\n");
+						raceDone = true;
+					}
+				}
+
+				al_draw_bitmap(raceBackground, 0, 0, NULL);
+
+				//Horses movement
+				for (i = 0; i < 6; i++) {
+					hPosX[i] += (rand() % 2) * hLevel[i] * 0.02 + (rand() % 2) * 2.5;
+				}
+				
+				//Every FPS events
+				if (events.type == ALLEGRO_EVENT_TIMER) {
+					draw = true;
+				}
+					
+				j = 1;
+				if (race) {
+					for (i = 0; i < 6; i++) {
+						if (hPosX[i] >= 590) {
+							race = false;
+							printf("***Horse0%i wins!***\n", i + 1);
+						}
+					}
+
+
+					if (draw) {
+						draw = false;
+
+						al_draw_bitmap(horse06, hPosX[5], hPosY[5], NULL);
+						al_draw_bitmap(box6, 20, bPosY[5], NULL);
+						al_draw_bitmap(horse05, hPosX[4], hPosY[4], NULL);
+						al_draw_bitmap(box5, 20, bPosY[4], NULL);
+						al_draw_bitmap(horse04, hPosX[3], hPosY[3], NULL);
+						al_draw_bitmap(box4, 20, bPosY[3], NULL);
+						al_draw_bitmap(horse03, hPosX[2], hPosY[2], NULL);
+						al_draw_bitmap(box3, 20, bPosY[2], NULL);
+						al_draw_bitmap(horse02, hPosX[1], hPosY[1], NULL);
+						al_draw_bitmap(box2, 20, bPosY[1], NULL);
+						al_draw_bitmap(horse01, hPosX[0], hPosY[0], NULL);
+						al_draw_bitmap(box1, 20, bPosY[0], NULL);
+
+						al_flip_display();
+					}
+				}		
+			}
+		}
 
 
 	}
@@ -201,6 +296,19 @@ int main() {
 	al_destroy_bitmap(startBackground);
 	al_destroy_bitmap(bettingBackground);
 	al_destroy_bitmap(instructionsBackground);
+	al_destroy_bitmap(raceBackground);
+	al_destroy_bitmap(box1);
+	al_destroy_bitmap(box2);
+	al_destroy_bitmap(box3);
+	al_destroy_bitmap(box4);
+	al_destroy_bitmap(box5);
+	al_destroy_bitmap(box6);
+	al_destroy_bitmap(horse01);
+	al_destroy_bitmap(horse02);
+	al_destroy_bitmap(horse03);
+	al_destroy_bitmap(horse04);
+	al_destroy_bitmap(horse05);
+	al_destroy_bitmap(horse06);
 	al_destroy_font(font1);
 	al_destroy_timer(timer);
 
