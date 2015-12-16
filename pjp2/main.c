@@ -30,25 +30,46 @@ int main() {
 	if (!al_install_mouse()) {
 		al_show_native_message_box(NULL, NULL, NULL, "Cannot install mouse!", NULL, NULL);
 	}
-//Global variables
+//Main variables and functions
+	int yon();
+	int pom();
 	int i, j;
+	float f;
 	const float FPS = 60.0f;
+	float hFPS[6]; //Horse animation timer speed
+	for (i = 0; i < 6; i++) {
+		hFPS[i] = 10.0f;
+	}
 	srand(time(NULL));
 	int layout = 1;
 	bool sounds = true, gameDone = false, draw = true;
 	int winner;
 	int hLevel[6]; //Horses levels
 	unsigned int balance, bet, betHorse, possibleProfit, add;
+	float cameraPosition[2] = { 0, 0 };
 //Allegro pointers
 	ALLEGRO_EVENT_QUEUE *event_queue = al_create_event_queue();
 	ALLEGRO_EVENT events;
 	ALLEGRO_DISPLAY *display = al_create_display(640, 360);
+	ALLEGRO_TRANSFORM camera;
 	ALLEGRO_TIMER *timer = al_create_timer(1.0 / FPS);
-	ALLEGRO_FONT *font1 = al_load_font("res/fonts/AmericanCaptain.ttf", 20, NULL);
+	ALLEGRO_TIMER *h00Timer = al_create_timer(1.0 / hFPS[0]); //Horse00 animation timer
+	ALLEGRO_TIMER *h01Timer = al_create_timer(1.0 / hFPS[1]); //Horse00 animation timer
+	ALLEGRO_TIMER *h02Timer = al_create_timer(1.0 / hFPS[2]); //Horse00 animation timer
+	ALLEGRO_TIMER *h03Timer = al_create_timer(1.0 / hFPS[3]); //Horse00 animation timer
+	ALLEGRO_TIMER *h04Timer = al_create_timer(1.0 / hFPS[4]); //Horse00 animation timer
+	ALLEGRO_TIMER *h05Timer = al_create_timer(1.0 / hFPS[5]); //Horse00 animation timer
+	ALLEGRO_FONT *font20 = al_load_font("res/fonts/AmericanCaptain.ttf", 20, NULL);
+	ALLEGRO_FONT *font25 = al_load_font("res/fonts/AmericanCaptain.ttf", 25, NULL);
+	ALLEGRO_FONT *font30 = al_load_font("res/fonts/AmericanCaptain.ttf", 30, NULL);
+	ALLEGRO_FONT *font60 = al_load_font("res/fonts/AmericanCaptain.ttf", 60, NULL);
 	//Start layout graphics
 	ALLEGRO_BITMAP *startBackground = al_load_bitmap("res/graphics/start/background.png");
+	ALLEGRO_BITMAP *highlightBig = al_load_bitmap("res/graphics/start/highlightBig.png");
+	ALLEGRO_BITMAP *highlightSmall = al_load_bitmap("res/graphics/start/highlightSmall.png");
 	//Betting layout graphics
 	ALLEGRO_BITMAP *bettingBackground = al_load_bitmap("res/graphics/betting/background.png");
+	ALLEGRO_BITMAP *raceGreyOut = al_load_bitmap("res/graphics/betting/raceGreyOut.png");
 	ALLEGRO_BITMAP *horseFace01 = NULL;
 	ALLEGRO_BITMAP *horseFace02 = NULL;
 	ALLEGRO_BITMAP *horseFace03 = NULL;
@@ -57,8 +78,10 @@ int main() {
 	ALLEGRO_BITMAP *horseFace06 = NULL;
 	//Instructions layout graphics
 	ALLEGRO_BITMAP *instructionsBackground = al_load_bitmap("res/graphics/instructions/background.png");
-	//Race layout graphics
+	//Race layout
 	ALLEGRO_BITMAP *raceBackground = al_load_bitmap("res/graphics/race/background.png");
+	ALLEGRO_BITMAP *finish = al_load_bitmap("res/graphics/race/finish.png");
+	ALLEGRO_BITMAP *raceInfo = al_load_bitmap("res/graphics/race/raceInfo.png");
 	ALLEGRO_BITMAP *box1 = al_load_bitmap("res/graphics/race/box1.png");
 	ALLEGRO_BITMAP *box2 = al_load_bitmap("res/graphics/race/box2.png");
 	ALLEGRO_BITMAP *box3 = al_load_bitmap("res/graphics/race/box3.png");
@@ -75,7 +98,19 @@ int main() {
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
 	al_register_event_source(event_queue, al_get_mouse_event_source());
 	al_register_event_source(event_queue, al_get_timer_event_source(timer));
-	al_start_timer(timer);	
+	al_start_timer(timer);
+	al_register_event_source(event_queue, al_get_timer_event_source(h00Timer));
+	al_start_timer(h00Timer);
+	al_register_event_source(event_queue, al_get_timer_event_source(h01Timer));
+	al_start_timer(h01Timer);
+	al_register_event_source(event_queue, al_get_timer_event_source(h02Timer));
+	al_start_timer(h02Timer);
+	al_register_event_source(event_queue, al_get_timer_event_source(h03Timer));
+	al_start_timer(h03Timer);
+	al_register_event_source(event_queue, al_get_timer_event_source(h04Timer));
+	al_start_timer(h04Timer);
+	al_register_event_source(event_queue, al_get_timer_event_source(h05Timer));
+	al_start_timer(h05Timer);
 //Reading high scores from file
 	//Loading scoreList.txt
 	FILE *fp;
@@ -138,26 +173,21 @@ int main() {
 //Game loop
 	while (!gameDone) {
 
+
+
 	//Start screen layout
 		if (layout == 1) {
 			balance = 1000;
 			add = 100;
 
-			al_draw_bitmap(startBackground, 0, 0, NULL);
-			al_draw_text(font1,	al_map_rgb(0, 0, 0), 310.0f, 64.0f, ALLEGRO_ALIGN_RIGHT, podiumName1);
-			al_draw_textf(font1, al_map_rgb(0, 0, 0), 330.0f, 64.0f, ALLEGRO_ALIGN_LEFT, "%llu", podiumScore1);
-			al_draw_text(font1, al_map_rgb(0, 0, 0), 310.0f, 88.0f, ALLEGRO_ALIGN_RIGHT, podiumName2);
-			al_draw_textf(font1, al_map_rgb(0, 0, 0), 330.0f, 88.0f, ALLEGRO_ALIGN_LEFT, "%llu", podiumScore2);
-			al_draw_text(font1, al_map_rgb(0, 0, 0), 310.0f, 112.0f, ALLEGRO_ALIGN_RIGHT, podiumName3);
-			al_draw_textf(font1, al_map_rgb(0, 0, 0), 330.0f, 112.0f, ALLEGRO_ALIGN_LEFT, "%llu", podiumScore3);
-			al_draw_text(font1, al_map_rgb(0, 0, 0), 310.0f, 136.0f, ALLEGRO_ALIGN_RIGHT, podiumName4);
-			al_draw_textf(font1, al_map_rgb(0, 0, 0), 330.0f, 136.0f, ALLEGRO_ALIGN_LEFT, "%llu", podiumScore4);
-			al_draw_text(font1, al_map_rgb(0, 0, 0), 310.0f, 160.0f, ALLEGRO_ALIGN_RIGHT, podiumName5);
-			al_draw_textf(font1, al_map_rgb(0, 0, 0), 330.0f, 160.0f, ALLEGRO_ALIGN_LEFT, "%llu", podiumScore5);
-			al_flip_display();
+			bool highlightExitDraw = false, highlightStartDraw = false, highlightInstructionsDraw = false;
 
 		//Start screen loop
 			while (layout == 1) {
+				if (events.type == ALLEGRO_EVENT_TIMER) {
+					draw = true;
+				}
+
 				al_wait_for_event(event_queue, &events);
 				if (events.type == ALLEGRO_EVENT_KEY_DOWN) {
 					if (events.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
@@ -171,7 +201,7 @@ int main() {
 						layout = -1;
 						gameDone = true;
 					}
-					//New game button
+					//Start button
 					if (events.mouse.button & 1 && events.mouse.x >= 200 && events.mouse.x <= 440 && events.mouse.y >= 220 && events.mouse.y <= 320) {
 						layout = 2;
 						printf("Layout: 2\n");
@@ -187,6 +217,54 @@ int main() {
 						printf("Sounds: %i\n", sounds);
 					}
 				}
+				if (events.type == ALLEGRO_EVENT_MOUSE_AXES) {
+					//Exit button highlight
+					if (events.mouse.x >= 40 && events.mouse.x <= 160 && events.mouse.y >= 240 && events.mouse.y <= 300) {
+						highlightExitDraw = true;
+					}
+					else (highlightExitDraw = false);
+					//Start button highlight
+					if (events.mouse.x >= 200 && events.mouse.x <= 440 && events.mouse.y >= 220 && events.mouse.y <= 320) {
+						highlightStartDraw = true;
+					}
+					else (highlightStartDraw = false);
+					//Instructions highlight
+					if (events.mouse.x >= 480 && events.mouse.x <= 600 && events.mouse.y >= 240 && events.mouse.y <= 300) {
+						highlightInstructionsDraw = true;
+					}
+					else (highlightInstructionsDraw = false);
+				}
+
+				if (draw) {
+					draw = false;
+
+
+					al_draw_bitmap(startBackground, 0, 0, NULL);
+					al_draw_text(font20, al_map_rgb(0, 0, 0), 310.0f, 64.0f, ALLEGRO_ALIGN_RIGHT, podiumName1);
+					al_draw_textf(font20, al_map_rgb(0, 0, 0), 330.0f, 64.0f, ALLEGRO_ALIGN_LEFT, "%llu", podiumScore1);
+					al_draw_text(font20, al_map_rgb(0, 0, 0), 310.0f, 88.0f, ALLEGRO_ALIGN_RIGHT, podiumName2);
+					al_draw_textf(font20, al_map_rgb(0, 0, 0), 330.0f, 88.0f, ALLEGRO_ALIGN_LEFT, "%llu", podiumScore2);
+					al_draw_text(font20, al_map_rgb(0, 0, 0), 310.0f, 112.0f, ALLEGRO_ALIGN_RIGHT, podiumName3);
+					al_draw_textf(font20, al_map_rgb(0, 0, 0), 330.0f, 112.0f, ALLEGRO_ALIGN_LEFT, "%llu", podiumScore3);
+					al_draw_text(font20, al_map_rgb(0, 0, 0), 310.0f, 136.0f, ALLEGRO_ALIGN_RIGHT, podiumName4);
+					al_draw_textf(font20, al_map_rgb(0, 0, 0), 330.0f, 136.0f, ALLEGRO_ALIGN_LEFT, "%llu", podiumScore4);
+					al_draw_text(font20, al_map_rgb(0, 0, 0), 310.0f, 160.0f, ALLEGRO_ALIGN_RIGHT, podiumName5);
+					al_draw_textf(font20, al_map_rgb(0, 0, 0), 330.0f, 160.0f, ALLEGRO_ALIGN_LEFT, "%llu", podiumScore5);
+
+					
+
+					if (highlightExitDraw) {
+						al_draw_bitmap(highlightSmall, 40.0f, 240.0f, NULL);
+					}
+					else if (highlightStartDraw) {
+						al_draw_bitmap(highlightBig, 200.0f, 220.0f, NULL);
+					}
+					else if (highlightInstructionsDraw) {
+						al_draw_bitmap(highlightSmall, 480.0f, 240.0f, NULL);
+					}
+
+					al_flip_display();
+				}
 			}
 		}
 
@@ -198,158 +276,217 @@ int main() {
 
 			for (i = 0; i < 6; i++) {
 				hLevel[i] = rand() % 6 + 1;	//Setting random horse levels
-				printf(">horse0%i - %i\n", i + 1, hLevel[i]);
+				//printf(">horse0%i - %i\n", i + 1, hLevel[i]);
 			}
+
+			//Set camera to default position
+			al_identity_transform(&camera);
+			al_translate_transform(&camera, 0, 0);
+			al_use_transform(&camera);
 
 			//Setting random horse skins
 			//Horse01
-			i = rand() % 7;
+			i = rand() % 10;
 			switch (i) {
-			case 0: horse01 = al_load_bitmap("res/graphics/race/horse00.png");
+			case 0: horse01 = al_load_bitmap("res/graphics/race/horseSpriteSheet00.png");
 				horseFace01 = al_load_bitmap("res/graphics/betting/horseFace00.png");
 				break;
-			case 1: horse01 = al_load_bitmap("res/graphics/race/horse01.png");
+			case 1: horse01 = al_load_bitmap("res/graphics/race/horseSpriteSheet01.png");
 				horseFace01 = al_load_bitmap("res/graphics/betting/horseFace01.png");
 				break;
-			case 2: horse01 = al_load_bitmap("res/graphics/race/horse02.png");
+			case 2: horse01 = al_load_bitmap("res/graphics/race/horseSpriteSheet02.png");
 				horseFace01 = al_load_bitmap("res/graphics/betting/horseFace02.png");
 				break;
-			case 3: horse01 = al_load_bitmap("res/graphics/race/horse03.png");
+			case 3: horse01 = al_load_bitmap("res/graphics/race/horseSpriteSheet03.png");
 				horseFace01 = al_load_bitmap("res/graphics/betting/horseFace03.png");
 				break;
-			case 4: horse01 = al_load_bitmap("res/graphics/race/horse04.png");
+			case 4: horse01 = al_load_bitmap("res/graphics/race/horseSpriteSheet04.png");
 				horseFace01 = al_load_bitmap("res/graphics/betting/horseFace04.png");
 				break;
-			case 5: horse01 = al_load_bitmap("res/graphics/race/horse05.png");
+			case 5: horse01 = al_load_bitmap("res/graphics/race/horseSpriteSheet05.png");
 				horseFace01 = al_load_bitmap("res/graphics/betting/horseFace05.png");
 				break;
-			case 6: horse01 = al_load_bitmap("res/graphics/race/horse06.png");
+			case 6: horse01 = al_load_bitmap("res/graphics/race/horseSpriteSheet06.png");
 				horseFace01 = al_load_bitmap("res/graphics/betting/horseFace06.png");
+				break;
+			case 7: horse01 = al_load_bitmap("res/graphics/race/horseSpriteSheet07.png");
+				horseFace01 = al_load_bitmap("res/graphics/betting/horseFace07.png");
+				break;
+			case 8: horse01 = al_load_bitmap("res/graphics/race/horseSpriteSheet08.png");
+				horseFace01 = al_load_bitmap("res/graphics/betting/horseFace08.png");
+				break;
+			case 9: horse01 = al_load_bitmap("res/graphics/race/horseSpriteSheet09.png");
+				horseFace01 = al_load_bitmap("res/graphics/betting/horseFace09.png");
 				break;
 			}
 			//Horse02
-			i = rand() % 7;
+			i = rand() % 10;
 			switch (i) {
-			case 0: horse02 = al_load_bitmap("res/graphics/race/horse00.png");
+			case 0: horse02 = al_load_bitmap("res/graphics/race/horseSpriteSheet00.png");
 				horseFace02 = al_load_bitmap("res/graphics/betting/horseFace00.png");
 				break;
-			case 1: horse02 = al_load_bitmap("res/graphics/race/horse01.png");
+			case 1: horse02 = al_load_bitmap("res/graphics/race/horseSpriteSheet01.png");
 				horseFace02 = al_load_bitmap("res/graphics/betting/horseFace01.png");
 				break;
-			case 2: horse02 = al_load_bitmap("res/graphics/race/horse02.png");
+			case 2: horse02 = al_load_bitmap("res/graphics/race/horseSpriteSheet02.png");
 				horseFace02 = al_load_bitmap("res/graphics/betting/horseFace02.png");
 				break;
-			case 3: horse02 = al_load_bitmap("res/graphics/race/horse03.png");
+			case 3: horse02 = al_load_bitmap("res/graphics/race/horseSpriteSheet03.png");
 				horseFace02 = al_load_bitmap("res/graphics/betting/horseFace03.png");
 				break;
-			case 4: horse02 = al_load_bitmap("res/graphics/race/horse04.png");
+			case 4: horse02 = al_load_bitmap("res/graphics/race/horseSpriteSheet04.png");
 				horseFace02 = al_load_bitmap("res/graphics/betting/horseFace04.png");
 				break;
-			case 5: horse02 = al_load_bitmap("res/graphics/race/horse05.png");
+			case 5: horse02 = al_load_bitmap("res/graphics/race/horseSpriteSheet05.png");
 				horseFace02 = al_load_bitmap("res/graphics/betting/horseFace05.png");
 				break;
-			case 6: horse02 = al_load_bitmap("res/graphics/race/horse06.png");
+			case 6: horse02 = al_load_bitmap("res/graphics/race/horseSpriteSheet06.png");
 				horseFace02 = al_load_bitmap("res/graphics/betting/horseFace06.png");
+				break;
+			case 7: horse02 = al_load_bitmap("res/graphics/race/horseSpriteSheet07.png");
+				horseFace02 = al_load_bitmap("res/graphics/betting/horseFace07.png");
+				break;
+			case 8: horse02 = al_load_bitmap("res/graphics/race/horseSpriteSheet08.png");
+				horseFace02 = al_load_bitmap("res/graphics/betting/horseFace08.png");
+				break;
+			case 9: horse02 = al_load_bitmap("res/graphics/race/horseSpriteSheet09.png");
+				horseFace02 = al_load_bitmap("res/graphics/betting/horseFace09.png");
 				break;
 			}
 			//Horse03
-			i = rand() % 7;
+			i = rand() % 10;
 			switch (i) {
-			case 0: horse03 = al_load_bitmap("res/graphics/race/horse00.png");
+			case 0: horse03 = al_load_bitmap("res/graphics/race/horseSpriteSheet00.png");
 				horseFace03 = al_load_bitmap("res/graphics/betting/horseFace00.png");
 				break;
-			case 1: horse03 = al_load_bitmap("res/graphics/race/horse01.png");
+			case 1: horse03 = al_load_bitmap("res/graphics/race/horseSpriteSheet01.png");
 				horseFace03 = al_load_bitmap("res/graphics/betting/horseFace01.png");
 				break;
-			case 2: horse03 = al_load_bitmap("res/graphics/race/horse02.png");
+			case 2: horse03 = al_load_bitmap("res/graphics/race/horseSpriteSheet02.png");
 				horseFace03 = al_load_bitmap("res/graphics/betting/horseFace02.png");
 				break;
-			case 3: horse03 = al_load_bitmap("res/graphics/race/horse03.png");
+			case 3: horse03 = al_load_bitmap("res/graphics/race/horseSpriteSheet03.png");
 				horseFace03 = al_load_bitmap("res/graphics/betting/horseFace03.png");
 				break;
-			case 4: horse03 = al_load_bitmap("res/graphics/race/horse04.png");
+			case 4: horse03 = al_load_bitmap("res/graphics/race/horseSpriteSheet04.png");
 				horseFace03 = al_load_bitmap("res/graphics/betting/horseFace04.png");
 				break;
-			case 5: horse03 = al_load_bitmap("res/graphics/race/horse05.png");
+			case 5: horse03 = al_load_bitmap("res/graphics/race/horseSpriteSheet05.png");
 				horseFace03 = al_load_bitmap("res/graphics/betting/horseFace05.png");
 				break;
-			case 6: horse03 = al_load_bitmap("res/graphics/race/horse06.png");
+			case 6: horse03 = al_load_bitmap("res/graphics/race/horseSpriteSheet06.png");
 				horseFace03 = al_load_bitmap("res/graphics/betting/horseFace06.png");
+				break;
+			case 7: horse03 = al_load_bitmap("res/graphics/race/horseSpriteSheet07.png");
+				horseFace03 = al_load_bitmap("res/graphics/betting/horseFace07.png");
+				break;
+			case 8: horse03 = al_load_bitmap("res/graphics/race/horseSpriteSheet08.png");
+				horseFace03 = al_load_bitmap("res/graphics/betting/horseFace08.png");
+				break;
+			case 9: horse03 = al_load_bitmap("res/graphics/race/horseSpriteSheet09.png");
+				horseFace03 = al_load_bitmap("res/graphics/betting/horseFace09.png");
 				break;
 			}
 			//Horse04
-			i = rand() % 7;
+			i = rand() % 10;
 			switch (i) {
-			case 0: horse04 = al_load_bitmap("res/graphics/race/horse00.png");
+			case 0: horse04 = al_load_bitmap("res/graphics/race/horseSpriteSheet00.png");
 				horseFace04 = al_load_bitmap("res/graphics/betting/horseFace00.png");
 				break;
-			case 1: horse04 = al_load_bitmap("res/graphics/race/horse01.png");
+			case 1: horse04 = al_load_bitmap("res/graphics/race/horseSpriteSheet01.png");
 				horseFace04 = al_load_bitmap("res/graphics/betting/horseFace01.png");
 				break;
-			case 2: horse04 = al_load_bitmap("res/graphics/race/horse02.png");
+			case 2: horse04 = al_load_bitmap("res/graphics/race/horseSpriteSheet02.png");
 				horseFace04 = al_load_bitmap("res/graphics/betting/horseFace02.png");
 				break;
-			case 3: horse04 = al_load_bitmap("res/graphics/race/horse03.png");
+			case 3: horse04 = al_load_bitmap("res/graphics/race/horseSpriteSheet03.png");
 				horseFace04 = al_load_bitmap("res/graphics/betting/horseFace03.png");
 				break;
-			case 4: horse04 = al_load_bitmap("res/graphics/race/horse04.png");
+			case 4: horse04 = al_load_bitmap("res/graphics/race/horseSpriteSheet04.png");
 				horseFace04 = al_load_bitmap("res/graphics/betting/horseFace04.png");
 				break;
-			case 5: horse04 = al_load_bitmap("res/graphics/race/horse05.png");
+			case 5: horse04 = al_load_bitmap("res/graphics/race/horseSpriteSheet05.png");
 				horseFace04 = al_load_bitmap("res/graphics/betting/horseFace05.png");
 				break;
-			case 6: horse04 = al_load_bitmap("res/graphics/race/horse06.png");
+			case 6: horse04 = al_load_bitmap("res/graphics/race/horseSpriteSheet06.png");
 				horseFace04 = al_load_bitmap("res/graphics/betting/horseFace06.png");
+				break;
+			case 7: horse04 = al_load_bitmap("res/graphics/race/horseSpriteSheet07.png");
+				horseFace04 = al_load_bitmap("res/graphics/betting/horseFace07.png");
+				break;
+			case 8: horse04 = al_load_bitmap("res/graphics/race/horseSpriteSheet08.png");
+				horseFace04 = al_load_bitmap("res/graphics/betting/horseFace08.png");
+				break;
+			case 9: horse04 = al_load_bitmap("res/graphics/race/horseSpriteSheet09.png");
+				horseFace04 = al_load_bitmap("res/graphics/betting/horseFace09.png");
 				break;
 			}
 			//Horse05
-			i = rand() % 7;
+			i = rand() % 10;
 			switch (i) {
-			case 0: horse05 = al_load_bitmap("res/graphics/race/horse00.png");
+			case 0: horse05 = al_load_bitmap("res/graphics/race/horseSpriteSheet00.png");
 				horseFace05 = al_load_bitmap("res/graphics/betting/horseFace00.png");
 				break;
-			case 1: horse05 = al_load_bitmap("res/graphics/race/horse01.png");
+			case 1: horse05 = al_load_bitmap("res/graphics/race/horseSpriteSheet01.png");
 				horseFace05 = al_load_bitmap("res/graphics/betting/horseFace01.png");
 				break;
-			case 2: horse05 = al_load_bitmap("res/graphics/race/horse02.png");
+			case 2: horse05 = al_load_bitmap("res/graphics/race/horseSpriteSheet02.png");
 				horseFace05 = al_load_bitmap("res/graphics/betting/horseFace02.png");
 				break;
-			case 3: horse05 = al_load_bitmap("res/graphics/race/horse03.png");
+			case 3: horse05 = al_load_bitmap("res/graphics/race/horseSpriteSheet03.png");
 				horseFace05 = al_load_bitmap("res/graphics/betting/horseFace03.png");
 				break;
-			case 4: horse05 = al_load_bitmap("res/graphics/race/horse04.png");
+			case 4: horse05 = al_load_bitmap("res/graphics/race/horseSpriteSheet04.png");
 				horseFace05 = al_load_bitmap("res/graphics/betting/horseFace04.png");
 				break;
-			case 5: horse05 = al_load_bitmap("res/graphics/race/horse05.png");
+			case 5: horse05 = al_load_bitmap("res/graphics/race/horseSpriteSheet05.png");
 				horseFace05 = al_load_bitmap("res/graphics/betting/horseFace05.png");
 				break;
-			case 6: horse05 = al_load_bitmap("res/graphics/race/horse06.png");
+			case 6: horse05 = al_load_bitmap("res/graphics/race/horseSpriteSheet06.png");
 				horseFace05 = al_load_bitmap("res/graphics/betting/horseFace06.png");
+				break;
+			case 7: horse05 = al_load_bitmap("res/graphics/race/horseSpriteSheet07.png");
+				horseFace05 = al_load_bitmap("res/graphics/betting/horseFace07.png");
+				break;
+			case 8: horse05 = al_load_bitmap("res/graphics/race/horseSpriteSheet08.png");
+				horseFace05 = al_load_bitmap("res/graphics/betting/horseFace08.png");
+				break;
+			case 9: horse05 = al_load_bitmap("res/graphics/race/horseSpriteSheet09.png");
+				horseFace05 = al_load_bitmap("res/graphics/betting/horseFace09.png");
 				break;
 			}
 			//Horse06
-			i = rand() % 7;
+			i = rand() % 10;
 			switch (i) {
-			case 0: horse06 = al_load_bitmap("res/graphics/race/horse00.png");
+			case 0: horse06 = al_load_bitmap("res/graphics/race/horseSpriteSheet00.png");
 				horseFace06 = al_load_bitmap("res/graphics/betting/horseFace00.png");
 				break;
-			case 1: horse06 = al_load_bitmap("res/graphics/race/horse01.png");
+			case 1: horse06 = al_load_bitmap("res/graphics/race/horseSpriteSheet01.png");
 				horseFace06 = al_load_bitmap("res/graphics/betting/horseFace01.png");
 				break;
-			case 2: horse06 = al_load_bitmap("res/graphics/race/horse02.png");
+			case 2: horse06 = al_load_bitmap("res/graphics/race/horseSpriteSheet02.png");
 				horseFace06 = al_load_bitmap("res/graphics/betting/horseFace02.png");
 				break;
-			case 3: horse06 = al_load_bitmap("res/graphics/race/horse03.png");
+			case 3: horse06 = al_load_bitmap("res/graphics/race/horseSpriteSheet03.png");
 				horseFace06 = al_load_bitmap("res/graphics/betting/horseFace03.png");
 				break;
-			case 4: horse06 = al_load_bitmap("res/graphics/race/horse04.png");
+			case 4: horse06 = al_load_bitmap("res/graphics/race/horseSpriteSheet04.png");
 				horseFace06 = al_load_bitmap("res/graphics/betting/horseFace04.png");
 				break;
-			case 5: horse06 = al_load_bitmap("res/graphics/race/horse05.png");
+			case 5: horse06 = al_load_bitmap("res/graphics/race/horseSpriteSheet05.png");
 				horseFace06 = al_load_bitmap("res/graphics/betting/horseFace05.png");
 				break;
-			case 6: horse06 = al_load_bitmap("res/graphics/race/horse06.png");
+			case 6: horse06 = al_load_bitmap("res/graphics/race/horseSpriteSheet06.png");
 				horseFace06 = al_load_bitmap("res/graphics/betting/horseFace06.png");
+				break;
+			case 7: horse06 = al_load_bitmap("res/graphics/race/horseSpriteSheet07.png");
+				horseFace06 = al_load_bitmap("res/graphics/betting/horseFace07.png");
+				break;
+			case 8: horse06 = al_load_bitmap("res/graphics/race/horseSpriteSheet08.png");
+				horseFace06 = al_load_bitmap("res/graphics/betting/horseFace08.png");
+				break;
+			case 9: horse06 = al_load_bitmap("res/graphics/race/horseSpriteSheet09.png");
+				horseFace06 = al_load_bitmap("res/graphics/betting/horseFace09.png");
 				break;
 			}
 
@@ -381,7 +518,7 @@ int main() {
 						if (events.mouse.y >= 270 && events.mouse.y <= 290) {
 							//Multiple by 10
 							if (events.mouse.x >= 340 && events.mouse.x <= 360 &&
-								add * 10 <= balance) {
+								add * 10 <= balance + bet) {
 								add *= 10;
 							}
 							//Divide by 10
@@ -448,35 +585,40 @@ int main() {
 						sum += hLevel[i];
 					}
 					float sumDivided = sum / hLevel[betHorse]; //sum divided by betHorse level
-					possibleProfit = (unsigned int)(sumDivided < 0 ? (sumDivided - 0.5) : (sumDivided + 0.5));
+					possibleProfit = (unsigned int)(sumDivided < 0 ? (sumDivided - 0.5) : (sumDivided + 0.5)); //Rounding mechanism
 					possibleProfit *= bet;
 				}
 
 				if (draw) {
 					draw = false;
 
-					al_draw_bitmap(bettingBackground, 0, 0, NULL);
 					al_draw_bitmap(horseFace01, 30.0f, 120.0f, NULL);
 					al_draw_bitmap(horseFace02, 130.0f, 120.0f, NULL);
 					al_draw_bitmap(horseFace03, 230.0f, 120.0f, NULL);
 					al_draw_bitmap(horseFace04, 330.0f, 120.0f, NULL);
 					al_draw_bitmap(horseFace05, 430.0f, 120.0f, NULL);
 					al_draw_bitmap(horseFace06, 530.0f, 120.0f, NULL);
+					al_draw_bitmap(bettingBackground, 0, 0, NULL);
 
 					for (i = 0; i < 6; i++) {
 						for (j = 0; j < hLevel[i]; j++) {
-							al_draw_filled_circle(30.0f + i * 100.0f + j * 10.0f, 190.0f, 3.0f, al_map_rgb(0, 0, 0));	//Show horses' level
+							al_draw_filled_circle(42.0f + i * 100.0f + j * 11.0f, 190.0f, 3.0f, al_map_rgb(0, 70 + 30 * j, 0));	//Show horses' level
 						}
 					}
 
 					if (betHorse != -1) {
-						al_draw_rectangle(28.0f + betHorse * 100, 118.0f, 112.0f + betHorse * 100, 182.0f, al_map_rgb(70, 200, 70), 4);
+						//al_draw_rectangle(28.0f + betHorse * 100, 118.0f, 112.0f + betHorse * 100, 182.0f, al_map_rgb(70, 200, 70), 4);
+						al_draw_rounded_rectangle(28.0f + betHorse * 100, 118.0f, 112.0f + betHorse * 100, 182.0f, 12, 12, al_map_rgb(174, 0, 0), 5);
+					}
+					
+					if (betHorse == -1 || bet == 0) {
+						al_draw_bitmap(raceGreyOut, 430.0f, 260.0f, NULL);
 					}
 
-					al_draw_textf(font1, al_map_rgb(0, 0, 0), 350.0f, 40.0f, ALLEGRO_ALIGN_LEFT, "%u", balance);
-					al_draw_textf(font1, al_map_rgb(0, 0, 0), 40.0f, 290.0f, ALLEGRO_ALIGN_LEFT, "%u", bet);
-					al_draw_textf(font1, al_map_rgb(0, 0, 0), 430.0f, 240.0f, ALLEGRO_ALIGN_LEFT, "%u", possibleProfit);
-					al_draw_textf(font1, al_map_rgb(0, 0, 0), 310.0f, 270.0f, ALLEGRO_ALIGN_CENTER, "%u", add);
+					al_draw_textf(font30, al_map_rgb(172, 129, 25), 340.0f, 38.0f, ALLEGRO_ALIGN_LEFT, "%u", balance);
+					al_draw_textf(font25, al_map_rgb(5, 30, 17), 40.0f, 290.0f, ALLEGRO_ALIGN_LEFT, "%u", bet);
+					al_draw_textf(font25, al_map_rgb(0, 0, 0), 440.0f, 220.0f, ALLEGRO_ALIGN_LEFT, "%u", possibleProfit);
+					al_draw_textf(font20, al_map_rgb(43, 114, 78), 310.0f, 271.0f, ALLEGRO_ALIGN_CENTER, "%u", add);
 
 					al_flip_display();
 				}
@@ -485,12 +627,15 @@ int main() {
 			}
 		}
 
-		
-
 	//Instructions layout
 		if (layout == 3) {
 			al_draw_bitmap(instructionsBackground, 0, 0, NULL);
 			al_flip_display();
+
+			//Set camera to default position
+			al_identity_transform(&camera);
+			al_translate_transform(&camera, 0, 0);
+			al_use_transform(&camera);
 
 			al_wait_for_event(event_queue, &events);
 			if (events.type == ALLEGRO_EVENT_KEY_DOWN) {
@@ -506,6 +651,18 @@ int main() {
 			bool race = true;
 			float hPosX[6], hPosY[6];
 			float bPosY[6];
+			float hVelocity[6] = { 2.5, 2.5, 2.5, 2.5, 2.5, 2.5}; //Horses velocity
+			int closestHorse;
+			float offset = 0;
+
+			//Animation variables
+			float hSourceX[6], hSourceY[6];
+			bool hDraw[6];
+			for (i = 0; i < 6; i++) {
+				hSourceX[i] = 0;
+				hSourceY[i] = 0;
+				hDraw[i] = false;
+			}
 
 			for (i = 0; i < 6; i++) {
 				hPosX[i] = 20;
@@ -523,14 +680,32 @@ int main() {
 						}
 						else {
 							al_stop_timer(timer);
+							al_stop_timer(h00Timer);
+							al_stop_timer(h01Timer);
+							al_stop_timer(h02Timer);
+							al_stop_timer(h03Timer);
+							al_stop_timer(h04Timer);
+							al_stop_timer(h05Timer);
 							printf("Race stopped\n");
 							if (al_show_native_message_box(display, "Stop the race", "Your bet will be lost", "Are you sure you want to stop the race?", NULL, ALLEGRO_MESSAGEBOX_YES_NO) == 1){
 								layout = 2;
 								printf("Layout: 2\n");
 								al_start_timer(timer);
+								al_start_timer(h00Timer);
+								al_start_timer(h01Timer);
+								al_start_timer(h02Timer);
+								al_start_timer(h03Timer);
+								al_start_timer(h04Timer);
+								al_start_timer(h05Timer);
 							}
 							else {
 								al_start_timer(timer);
+								al_start_timer(h00Timer);
+								al_start_timer(h01Timer);
+								al_start_timer(h02Timer);
+								al_start_timer(h03Timer);
+								al_start_timer(h04Timer);
+								al_start_timer(h05Timer);
 								printf("Race started\n");
 							}
 						}
@@ -544,12 +719,60 @@ int main() {
 					}
 				}
 
-				//Every FPS events
+				
 				if (events.type == ALLEGRO_EVENT_TIMER) {
-					for (i = 0; i < 6; i++) {
-						hPosX[i] += (rand() % 2) * hLevel[i] * 0.02 + (rand() % 2) * 2;	//Horses' movement
+					if (race) {
+						//Every FPS events
+						if (events.timer.source == timer) {
+							for (i = 0; i < 6; i++) {
+								hVelocity[i] += yon() * hLevel[i] * 0.002 + pom() * 0.03 + pom() * 0.03;	//Horses movement
+
+								if (hVelocity[i] > 0) {
+									hPosX[i] += hVelocity[i];
+								}
+							}
+							
+							//Checking which horse is closest to finish
+							closestHorse = 0;
+							f = 0;
+							for (i = 0; i < 6; i++) {
+								if (hPosX[i] > f) {
+									f = hPosX[i];
+									closestHorse = i;
+								}
+							}
+							
+							//Changing camera position after horse closest to finish
+							if ((hPosX[closestHorse] > offset + al_get_display_width(display) / 3 * 2) && offset <= 640) {
+								offset += hVelocity[closestHorse];
+								al_identity_transform(&camera);
+								al_translate_transform(&camera, -offset, 0);
+								al_use_transform(&camera);
+							}
+							
+						}
+						//Horses animation timers
+						else if (events.timer.source == h00Timer) {
+							hDraw[0] = true;
+						}
+						else if (events.timer.source == h01Timer) {
+							hDraw[1] = true;
+						}
+						else if (events.timer.source == h02Timer) {
+							hDraw[2] = true;
+						}
+						else if (events.timer.source == h03Timer) {
+							hDraw[3] = true;
+						}
+						else if (events.timer.source == h04Timer) {
+							hDraw[4] = true;
+						}
+						else if (events.timer.source == h05Timer) {
+							hDraw[5] = true;
+						}
 					}
-		
+
+					
 
 					draw = true;
 				}
@@ -558,42 +781,189 @@ int main() {
 				
 				if (draw) {
 					draw = false;
-
 					
-
 					if (race) {
 						al_draw_bitmap(raceBackground, 0, 0, NULL);
 
-						
+						//Info window
+						al_draw_bitmap(raceInfo, 0 + offset, 0, NULL);
+						for (i = 0; i < 6; i++) {
+							for (j = 0; j < hLevel[i]; j++) {
+								al_draw_filled_circle(35.0f + 10.0f * j + offset, 25.0f + 10.f * i, 3.0f, al_map_rgb(0, 70 + 30 * j, 0));	//Show horses' level
+							}
+						}
 
-						al_draw_filled_rectangle(20.0f, 142.0f + 30 * betHorse, 590.0f, 169.0f + 30 * betHorse, al_map_rgb(70, 200, 70));
-
-						al_draw_bitmap(horse01, hPosX[0], hPosY[0], NULL);
-						al_draw_bitmap(box1, 20, bPosY[0], NULL);
-						al_draw_bitmap(horse02, hPosX[1], hPosY[1], NULL);
-						al_draw_bitmap(box2, 20, bPosY[1], NULL);
-						al_draw_bitmap(horse03, hPosX[2], hPosY[2], NULL);
-						al_draw_bitmap(box3, 20, bPosY[2], NULL);
-						al_draw_bitmap(horse04, hPosX[3], hPosY[3], NULL);
-						al_draw_bitmap(box4, 20, bPosY[3], NULL);
-						al_draw_bitmap(horse05, hPosX[4], hPosY[4], NULL);
-						al_draw_bitmap(box5, 20, bPosY[4], NULL);
-						al_draw_bitmap(horse06, hPosX[5], hPosY[5], NULL);
-						al_draw_bitmap(box6, 20, bPosY[5], NULL);
 
 						//Win event
 						for (i = 0; i < 6; i++) {
-							if (hPosX[i] >= 590) {
+							if (hPosX[i] >= 1220){//590) {
 								race = false;
 
-								al_draw_text(font1, al_map_rgb(0, 0, 0), 320.0f, 148.0f + i * 30.0f, ALLEGRO_ALIGN_CENTER, "W I N N E R");
+								al_draw_filled_rectangle(offset, 140.0f + 30 * i, 640 + offset, 170.0f + 30 * i, al_map_rgb(172, 129, 25));
+								al_draw_text(font25, al_map_rgb(248, 187, 40), 320.0f + offset, 145.0f + i * 30.0f, ALLEGRO_ALIGN_CENTER, "W I N N E R");
+
+								al_draw_text(font20, al_map_rgb(32, 75, 31), 320.0f + offset, 333.0f, ALLEGRO_ALIGN_CENTER, "Click anywhere to continue...");
 
 								printf("***Horse0%i wins!***\n", i + 1);
 								if (i == betHorse) {
 									balance += possibleProfit;
+
+									al_draw_text(font60, al_map_rgb(174, 0, 0), 120.0f + offset, 27.0f, ALLEGRO_ALIGN_LEFT, "YOU WON");
+									al_draw_textf(font60, al_map_rgb(172, 129, 25), 310.0f + offset, 27.0f, ALLEGRO_ALIGN_LEFT, "%u", possibleProfit);
+								}
+								else {
+									al_draw_text(font60, al_map_rgb(174, 0, 0), 120.0f + offset, 27.0f, ALLEGRO_ALIGN_LEFT, "YOU LOST");
+								}
+
+								break;
+							}
+						}
+
+						al_draw_bitmap(finish, 1230.0f, 140.0f, NULL);
+
+						for (i = 0; i < 6; i++) {
+							al_draw_textf(font20, al_map_rgb(181, 155, 137), 5.0f + offset, 147.0f + i * 30.0f, ALLEGRO_ALIGN_LEFT, "%i", i + 1);
+						}
+
+						al_draw_text(font20, al_map_rgb(181, 155, 137), hPosX[betHorse] - 20.0f, 147.0f + betHorse * 30.0f, ALLEGRO_ALIGN_RIGHT, "YOUR HORSE");
+
+
+						//HORSES ANIMATION
+						
+						//Horse01 animation
+						al_draw_bitmap_region(horse01, hSourceX[0], hSourceY[0], 40, 40, hPosX[0], hPosY[0], NULL);
+						hFPS[0] = hVelocity[0] * 13;
+
+						al_set_timer_speed(h00Timer, 1.0f / hFPS[0]);
+
+						if (hDraw[0]) {
+							hDraw[0] = false;
+
+							if (hSourceX[0] < 120) {
+								hSourceX[0] += 40;
+							}
+							else {
+								hSourceX[0] = 0;
+								hSourceY[0] += 40;
+								if (hSourceY[0] >= 160) {
+									hSourceY[0] = 0;
 								}
 							}
 						}
+						//al_draw_bitmap(box1, 20, bPosY[0], NULL);
+
+						//Horse02 animation
+						al_draw_bitmap_region(horse02, hSourceX[1], hSourceY[1], 40, 40, hPosX[1], hPosY[1], NULL);
+						hFPS[1] = hVelocity[1] * 13;
+
+						al_set_timer_speed(h01Timer, 1.0f / hFPS[1]);
+
+						if (hDraw[1]) {
+							hDraw[1] = false;
+
+							if (hSourceX[1] < 120) {
+								hSourceX[1] += 40;
+							}
+							else {
+								hSourceX[1] = 0;
+								hSourceY[1] += 40;
+								if (hSourceY[1] >= 160) {
+									hSourceY[1] = 0;
+								}
+							}
+						}
+						//al_draw_bitmap(box2, 20, bPosY[1], NULL);
+						
+						//Horse03 animation
+						al_draw_bitmap_region(horse03, hSourceX[2], hSourceY[2], 40, 40, hPosX[2], hPosY[2], NULL);
+						hFPS[2] = hVelocity[2] * 13;
+
+						al_set_timer_speed(h02Timer, 1.0f / hFPS[2]);
+
+						if (hDraw[2]) {
+							hDraw[2] = false;
+
+							if (hSourceX[2] < 120) {
+								hSourceX[2] += 40;
+							}
+							else {
+								hSourceX[2] = 0;
+								hSourceY[2] += 40;
+								if (hSourceY[2] >= 160) {
+									hSourceY[2] = 0;
+								}
+							}
+						}
+						//al_draw_bitmap(box3, 20, bPosY[2], NULL);
+
+						//Horse04 animation
+						al_draw_bitmap_region(horse04, hSourceX[3], hSourceY[3], 40, 40, hPosX[3], hPosY[3], NULL);
+						hFPS[3] = hVelocity[3] * 13;
+
+						al_set_timer_speed(h03Timer, 1.0f / hFPS[3]);
+
+						if (hDraw[3]) {
+							hDraw[3] = false;
+
+							if (hSourceX[3] < 120) {
+								hSourceX[3] += 40;
+							}
+							else {
+								hSourceX[3] = 0;
+								hSourceY[3] += 40;
+								if (hSourceY[3] >= 160) {
+									hSourceY[3] = 0;
+								}
+							}
+						}
+						//al_draw_bitmap(box4, 20, bPosY[3], NULL);
+
+						//Horse05 animation
+						al_draw_bitmap_region(horse05, hSourceX[4], hSourceY[4], 40, 40, hPosX[4], hPosY[4], NULL);
+						hFPS[4] = hVelocity[4] * 13;
+
+						al_set_timer_speed(h04Timer, 1.0f / hFPS[4]);
+
+						if (hDraw[4]) {
+							hDraw[4] = false;
+
+							if (hSourceX[4] < 120) {
+								hSourceX[4] += 40;
+							}
+							else {
+								hSourceX[4] = 0;
+								hSourceY[4] += 40;
+								if (hSourceY[4] >= 160) {
+									hSourceY[4] = 0;
+								}
+							}
+						}
+						//al_draw_bitmap(box5, 20, bPosY[4], NULL);
+
+						//Horse06 animation
+						al_draw_bitmap_region(horse06, hSourceX[5], hSourceY[5], 40, 40, hPosX[5], hPosY[5], NULL);
+						hFPS[5] = hVelocity[5] * 13;
+
+						al_set_timer_speed(h05Timer, 1.0f / hFPS[5]);
+
+						if (hDraw[5]) {
+							hDraw[5] = false;
+
+							if (hSourceX[5] < 120) {
+								hSourceX[5] += 40;
+							}
+							else {
+								hSourceX[5] = 0;
+								hSourceY[5] += 40;
+								if (hSourceY[5] >= 160) {
+									hSourceY[5] = 0;
+								}
+							}
+						}
+						//al_draw_bitmap(box6, 20, bPosY[5], NULL);
+
+						//END OF HORSES ANIMATION
+						
 					}
 
 					al_flip_display();
@@ -612,6 +982,9 @@ int main() {
 	al_destroy_bitmap(bettingBackground);
 	al_destroy_bitmap(instructionsBackground);
 	al_destroy_bitmap(raceBackground);
+	al_destroy_bitmap(highlightBig);
+	al_destroy_bitmap(highlightSmall);
+	al_destroy_bitmap(raceGreyOut);
 	al_destroy_bitmap(horseFace01);
 	al_destroy_bitmap(horseFace02);
 	al_destroy_bitmap(horseFace03);
@@ -630,7 +1003,35 @@ int main() {
 	al_destroy_bitmap(horse04);
 	al_destroy_bitmap(horse05);
 	al_destroy_bitmap(horse06);
-	al_destroy_font(font1);
+	al_destroy_bitmap(finish);
+	al_destroy_bitmap(raceInfo);
+	al_destroy_font(font20);
 	al_destroy_timer(timer);
+	al_destroy_timer(h00Timer);
+	al_destroy_timer(h01Timer);
+	al_destroy_timer(h02Timer);
+	al_destroy_timer(h03Timer);
+	al_destroy_timer(h04Timer);
+	al_destroy_timer(h05Timer);
+
+
 	return 0;
+}
+
+//Additional functions
+
+int yon() {
+	//'Yes or no' function (randomly returns 0 or 1)
+	return rand() % 2;
+}
+
+int pom() {
+	//'Plus or minus' function (randomly returns 1 or -1)
+	int yn = rand() % 2;
+	if (yn == 1) {
+		return 1;
+	}
+	else {
+		return -1;
+	}
 }
