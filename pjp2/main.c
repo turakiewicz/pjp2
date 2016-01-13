@@ -4,6 +4,8 @@
 #include<allegro5\allegro_ttf.h>
 #include<allegro5\allegro_font.h>
 #include<allegro5\allegro_primitives.h>
+#include<allegro5\allegro_audio.h>
+#include<allegro5\allegro_acodec.h>
 
 #include<stdlib.h>
 #include<stdio.h>
@@ -24,6 +26,8 @@ int main() {
 	al_init_font_addon();
 	al_init_ttf_addon();
 	al_init_primitives_addon();
+	al_init_acodec_addon();
+	
 //Installing
 	if (!al_install_keyboard()) {
 		al_show_native_message_box(NULL, NULL, NULL, "Cannot install keyboard!", NULL, NULL);
@@ -31,9 +35,11 @@ int main() {
 	if (!al_install_mouse()) {
 		al_show_native_message_box(NULL, NULL, NULL, "Cannot install mouse!", NULL, NULL);
 	}
+	al_install_audio();
 //Main variables and functions
 	int yon();
 	int pom();
+	void makeHorseSound(ALLEGRO_SAMPLE *horseSound);
 	int i, j;
 	float f;
 	const float FPS = 60.0f;
@@ -62,12 +68,27 @@ int main() {
 	ALLEGRO_TIMER *h03Timer = al_create_timer(1.0 / hFPS[3]); //Horse00 animation timer
 	ALLEGRO_TIMER *h04Timer = al_create_timer(1.0 / hFPS[4]); //Horse00 animation timer
 	ALLEGRO_TIMER *h05Timer = al_create_timer(1.0 / hFPS[5]); //Horse00 animation timer
+	ALLEGRO_FONT *font18 = al_load_font("res/fonts/AmericanCaptain.ttf", 18, NULL);
 	ALLEGRO_FONT *font20 = al_load_font("res/fonts/AmericanCaptain.ttf", 20, NULL);
 	ALLEGRO_FONT *font25 = al_load_font("res/fonts/AmericanCaptain.ttf", 25, NULL);
 	ALLEGRO_FONT *font30 = al_load_font("res/fonts/AmericanCaptain.ttf", 30, NULL);
 	ALLEGRO_FONT *font60 = al_load_font("res/fonts/AmericanCaptain.ttf", 60, NULL);
 	ALLEGRO_FONT *secondFont = al_load_font("res/fonts/DejaVuSerifBold.ttf", 15, NULL);
 	ALLEGRO_FONT *signFont = al_load_font("res/fonts/MoonFlowerBold.ttf", 30, NULL);
+	//SOUNDS
+	ALLEGRO_SAMPLE *click = al_load_sample("res/sounds/click.wav");
+	ALLEGRO_SAMPLE *gallop = al_load_sample("res/sounds/gallop.wav");
+	ALLEGRO_SAMPLE *shoot = al_load_sample("res/sounds/shoot.wav");
+	ALLEGRO_SAMPLE *click2 = al_load_sample("res/sounds/click2.wav");
+	ALLEGRO_SAMPLE *click3 = al_load_sample("res/sounds/click3.wav");
+	ALLEGRO_SAMPLE *horseSound = NULL;
+	ALLEGRO_SAMPLE *raceSound = al_load_sample("res/sounds/race.wav");
+	ALLEGRO_SAMPLE *cashSound = al_load_sample("res/sounds/cash.wav");
+	ALLEGRO_SAMPLE *cheer = al_load_sample("res/sounds/cheer.wav");
+	ALLEGRO_SAMPLE *failSound = al_load_sample("res/sounds/fail.wav");
+
+	al_reserve_samples(8);
+
 	//Start layout graphics
 	ALLEGRO_BITMAP *startBackground = al_load_bitmap("res/graphics/start/background.png");
 	ALLEGRO_BITMAP *highlightBig = al_load_bitmap("res/graphics/start/highlightBig.png");
@@ -243,11 +264,13 @@ int main() {
 					if (events.mouse.button & 1 && events.mouse.x >= 200 && events.mouse.x <= 440 && events.mouse.y >= 220 && events.mouse.y <= 320) {
 						layout = 2;
 						printf("Layout: 2\n", NULL);
+						al_play_sample(click, 1.0f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
 					}
 					//Instructions button
 					if (events.mouse.button & 1 && events.mouse.x >= 480 && events.mouse.x <= 600 && events.mouse.y >= 240 && events.mouse.y <= 300) {
 						layout = 3;
 						printf("Layout: 3\n", NULL);
+						al_play_sample(click, 1.0f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
 					}
 					//Sounds button (doesn't work yet)
 					if (events.mouse.button & 1 && events.mouse.x >= 20 && events.mouse.x <= 60 && events.mouse.y >= 20 && events.mouse.y <= 60 && sounds == true) {
@@ -760,6 +783,7 @@ int main() {
 							if (events.mouse.x >= 430 && events.mouse.x <= 620 && events.mouse.y >= 260 && events.mouse.y <= 340 &&
 								bet > 0 && betHorse != -1) {
 								layout = 4;
+								al_play_sample(raceSound, 1.0f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
 								printf("Layout: 4\n", NULL);
 							}
 							//Change bet addition
@@ -768,11 +792,13 @@ int main() {
 								if (events.mouse.x >= 340 && events.mouse.x <= 360 &&
 									add * 10 <= balance + bet) {
 									add *= 10;
+									al_play_sample(click3, 1.5f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
 								}
 								//Divide by 10
 								if (events.mouse.x >= 260 && events.mouse.x <= 280 &&
 									add > 1) {
 									add /= 10;
+									al_play_sample(click3, 1.5f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
 								}
 							}
 							//Change bet
@@ -782,12 +808,14 @@ int main() {
 									balance >= add) {
 									bet += add;
 									balance -= add;
+									al_play_sample(click2, 2.0f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
 								}
 								//Subtract
 								if (events.mouse.y >= 310 && events.mouse.y <= 330 &&
 									bet >= add) {
 									bet -= add;
 									balance += add;
+									al_play_sample(click2, 2.0f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
 								}
 							}
 
@@ -797,31 +825,37 @@ int main() {
 								if (events.mouse.x >= 30 && events.mouse.x <= 110) {
 									betHorse = 0;
 									printf("horse0%i choosen\n", betHorse + 1);
+									makeHorseSound(horseSound);
 								}
 								//Horse 2
 								if (events.mouse.x >= 130 && events.mouse.x <= 210) {
 									betHorse = 1;
 									printf("horse0%i choosen\n", betHorse + 1);
+									makeHorseSound(horseSound);
 								}
 								//Horse 3
 								if (events.mouse.x >= 230 && events.mouse.x <= 310) {
 									betHorse = 2;
 									printf("horse0%i choosen\n", betHorse + 1);
+									makeHorseSound(horseSound);
 								}
 								//Horse 4
 								if (events.mouse.x >= 330 && events.mouse.x <= 410) {
 									betHorse = 3;
 									printf("horse0%i choosen\n", betHorse + 1);
+									makeHorseSound(horseSound);
 								}
 								//Horse 5
 								if (events.mouse.x >= 430 && events.mouse.x <= 510) {
 									betHorse = 4;
 									printf("horse0%i choosen\n", betHorse + 1);
+									makeHorseSound(horseSound);
 								}
 								//Horse 6
 								if (events.mouse.x >= 530 && events.mouse.x <= 610) {
 									betHorse = 5;
 									printf("horse0%i choosen\n", betHorse + 1);
+									makeHorseSound(horseSound);
 								}
 							}
 						}
@@ -832,6 +866,7 @@ int main() {
 						if (events.mouse.x >= 340 && events.mouse.x <= 580 && events.mouse.y >= 80 && events.mouse.y <= 100) {
 							takeMoneyPopup = true;
 							proceed = false;
+							al_play_sample(click, 1.0f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
 
 							
 							printf("Player's podium position: %i\n", playerPodiumPosition);
@@ -855,6 +890,7 @@ int main() {
 
 								if (saveScore) {
 									saveScore = false;
+									al_play_sample(click, 1.0f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
 									printf("SCORE SAVE\n");
 									switch (playerPodiumPosition) {
 									case 5:
@@ -1001,7 +1037,10 @@ int main() {
 
 									layout = 1;
 								}
-								
+								else {
+									layout = 1;
+									al_play_sample(click, 1.0f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
+								}
 							}
 
 						}
@@ -1074,9 +1113,10 @@ int main() {
 							al_draw_text(signFont, al_map_rgb(0, 0, 0), 265.0f, 175.0f, ALLEGRO_ALIGN_LEFT, playerName);
 						}
 						else {
-							al_draw_text(secondFont, al_map_rgb(123, 112, 96), 310.0f, 120.0f, ALLEGRO_ALIGN_CENTER, "Oops!");
-							al_draw_text(font25, al_map_rgb(0, 0, 0), 320.0f, 150.0f, ALLEGRO_ALIGN_CENTER, "NOT ENOUGH MONEY");
-							al_draw_text(font25, al_map_rgb(0, 0, 0), 320.0f, 175.0f, ALLEGRO_ALIGN_CENTER, "TO GET TO THE TOP LIST");
+							al_draw_text(secondFont, al_map_rgb(123, 112, 96), 320.0f, 120.0f, ALLEGRO_ALIGN_CENTER, "Oops!");
+							al_draw_text(font18, al_map_rgb(0, 0, 0), 320.0f, 142.0f, ALLEGRO_ALIGN_CENTER, "NOT ENOUGH MONEY");
+							al_draw_text(font18, al_map_rgb(0, 0, 0), 320.0f, 161.0f, ALLEGRO_ALIGN_CENTER, "TO GET TO THE TOP LIST");
+							al_draw_text(font30, al_map_rgb(174, 0, 0), 320.0f, 181.0f, ALLEGRO_ALIGN_CENTER, "E N D   G A M E ?");
 						}
 					}
 
@@ -1215,6 +1255,7 @@ int main() {
 						//Horses animation timers
 						else if (events.timer.source == h00Timer) {
 							hDraw[0] = true;
+							
 						}
 						else if (events.timer.source == h01Timer) {
 							hDraw[1] = true;
@@ -1260,6 +1301,8 @@ int main() {
 							if (hPosX[i] >= 1220){//590) {
 								race = false;
 
+								al_stop_samples();
+
 								al_draw_filled_rectangle(offset, 140.0f + 30 * i, 640 + offset, 170.0f + 30 * i, al_map_rgb(172, 129, 25));
 								al_draw_text(font25, al_map_rgb(248, 187, 40), 320.0f + offset, 145.0f + i * 30.0f, ALLEGRO_ALIGN_CENTER, "W I N N E R");
 
@@ -1269,11 +1312,16 @@ int main() {
 								if (i == betHorse) {
 									balance += possibleProfit;
 
+									
+									//al_play_sample(cheer, 2.0f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
+									al_play_sample(cashSound, 1.0f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
+
 									al_draw_text(font60, al_map_rgb(174, 0, 0), 120.0f + offset, 27.0f, ALLEGRO_ALIGN_LEFT, "YOU WON");
 									al_draw_textf(font60, al_map_rgb(172, 129, 25), 310.0f + offset, 27.0f, ALLEGRO_ALIGN_LEFT, "%u", possibleProfit);
 								}
 								else {
 									al_draw_text(font60, al_map_rgb(174, 0, 0), 120.0f + offset, 27.0f, ALLEGRO_ALIGN_LEFT, "YOU LOST");
+									al_play_sample(failSound, 0.9f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
 								}
 
 								break;
@@ -1471,12 +1519,23 @@ int main() {
 	al_destroy_bitmap(horse06);
 	al_destroy_bitmap(finish);
 	al_destroy_bitmap(raceInfo);
+	al_destroy_font(font18);
 	al_destroy_font(font20);
 	al_destroy_font(font25);
 	al_destroy_font(font30);
 	al_destroy_font(font60);
 	al_destroy_font(secondFont);
 	al_destroy_font(signFont);
+	al_destroy_sample(click);
+	al_destroy_sample(click2);
+	al_destroy_sample(click3);
+	al_destroy_sample(gallop);
+	al_destroy_sample(shoot);
+	al_destroy_sample(horseSound);
+	al_destroy_sample(raceSound);
+	al_destroy_sample(cashSound);
+	al_destroy_sample(cheer);
+	al_destroy_sample(failSound);
 	al_destroy_timer(timer);
 	al_destroy_timer(h00Timer);
 	al_destroy_timer(h01Timer);
@@ -1510,4 +1569,22 @@ int pom() {
 int numberOfDigits(long long int i)
 {
 	return i > 0 ? (int)log10((double)i) + 1 : 1;
+}
+
+void makeHorseSound(ALLEGRO_SAMPLE *horseSound) {
+	int i;
+	i = rand() % 4;
+
+	switch (i) {
+	case 0: horseSound = al_load_sample("res/sounds/horse1.wav");
+		break;
+	case 1: horseSound = al_load_sample("res/sounds/horse2.wav");
+		break;
+	case 2: horseSound = al_load_sample("res/sounds/horse3.wav");
+		break;
+	case 3: horseSound = al_load_sample("res/sounds/horse4.wav");
+		break;
+	}
+
+	al_play_sample(horseSound, 1.0f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
 }
