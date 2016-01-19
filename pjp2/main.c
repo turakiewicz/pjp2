@@ -12,6 +12,8 @@
 #include<time.h>
 #include<math.h>
 
+int i, j;
+
 //Włączanie/wyłączanie konsoli: Project -> [project name] Properties -> Configuration properties -> Linker -> System -> SubSystem -> (SUBSYSTEM:CONSOLE / SUBSYSTEM:WINDOWS)
 
 int main() {
@@ -40,7 +42,7 @@ int main() {
 	int yon();
 	int pom();
 	void makeHorseSound(ALLEGRO_SAMPLE *horseSound);
-	int i, j;
+	void exitGame(ALLEGRO_DISPLAY *display, int *layout, bool *gameDone);
 	float f;
 	const float FPS = 60.0f;
 	float hFPS[6]; //Horse animation timer speed
@@ -56,10 +58,17 @@ int main() {
 	float cameraPosition[2] = { 0, 0 };
 	bool cheatMode = false, resetBettingLayout = false;
 	int cheatBalance;
+	bool bankruptcy = false;
+	int *layoutPtr = &layout;
+	bool *gameDonePtr = &gameDone;
+
+	unsigned int statTotalRaces, statHighestBet, statMoneyWon, statMoneyLost, statHighestWin, statHighestLoss;
+	float statAccuracy, statRacesWon, statRacesLost;
 //Allegro pointers
 	ALLEGRO_EVENT_QUEUE *event_queue = al_create_event_queue();
 	ALLEGRO_EVENT events;
 	ALLEGRO_DISPLAY *display = al_create_display(640, 360);
+	al_set_window_title(display, "Gamble Ride");
 	ALLEGRO_TRANSFORM camera;
 	ALLEGRO_TIMER *timer = al_create_timer(1.0 / FPS);
 	ALLEGRO_TIMER *h00Timer = al_create_timer(1.0 / hFPS[0]); //Horse00 animation timer
@@ -122,9 +131,12 @@ int main() {
 	ALLEGRO_BITMAP *horse04 = NULL;
 	ALLEGRO_BITMAP *horse05 = NULL;
 	ALLEGRO_BITMAP *horse06 = NULL;
+	//End Career layout
+	ALLEGRO_BITMAP *endCareerBackground = al_load_bitmap("res/graphics/endCareer/background.png");
 //Registering event sources
 	al_register_event_source(event_queue, al_get_keyboard_event_source());
 	al_register_event_source(event_queue, al_get_mouse_event_source());
+	al_register_event_source(event_queue, al_get_display_event_source(display));
 	al_register_event_source(event_queue, al_get_timer_event_source(timer));
 	al_start_timer(timer);
 	al_register_event_source(event_queue, al_get_timer_event_source(h00Timer));
@@ -220,7 +232,7 @@ int main() {
 		k *= 10;
 	}
 
-
+	
 
 //Game loop
 	while (!gameDone) {
@@ -231,6 +243,16 @@ int main() {
 		if (layout == 1) {
 			balance = 1000;
 			add = 100;
+			bankruptcy = false;
+			statTotalRaces = 0;
+			statHighestBet = 0;
+			statAccuracy = 0;
+			statMoneyWon = 0;
+			statMoneyLost = 0;
+			statRacesWon = 0;
+			statRacesLost = 0;
+			statHighestWin = 0;
+			statHighestLoss = 0;
 
 			bool highlightExitDraw = false, highlightStartDraw = false, highlightInstructionsDraw = false;
 
@@ -254,7 +276,10 @@ int main() {
 						gameDone = true;
 					}
 				}
-				if (events.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+				else if (events.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+					exitGame(display, layoutPtr, gameDonePtr);
+				}
+				else if (events.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
 					//Exit button
 					if (events.mouse.button & 1 && events.mouse.x >= 40 && events.mouse.x <= 160 && events.mouse.y >= 240 && events.mouse.y <= 300) {
 						layout = -1;
@@ -328,7 +353,7 @@ int main() {
 				}
 			}
 		}
-
+		
 	//Betting layout
 		if (layout == 2) {
 			bet = 0;
@@ -580,8 +605,10 @@ int main() {
 				if (events.type == ALLEGRO_EVENT_KEY_DOWN) {
 					//Exit
 					if (events.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
-						layout = 1;
-						printf("Layout: 1\n", NULL);
+						if (al_show_native_message_box(display, "END CAREER", "Your progress will be lost", "End career?", NULL, ALLEGRO_MESSAGEBOX_YES_NO) == 1){
+							layout = 1;
+							al_play_sample(click, 1.0f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
+						}
 					}
 
 					//CHEAT MODE ('M' to add 1000 to balance, 'R' to restart random horses)
@@ -774,8 +801,10 @@ int main() {
 						printf("Current letter: %i\n", currentLetter);
 					}
 				}
-
-				if (events.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+				else if (events.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+					exitGame(display, layoutPtr, gameDonePtr);
+				}
+				else if (events.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
 					//Left mouse button clicked
 					if (events.mouse.button & 1) {
 						if (!takeMoneyPopup) {
@@ -891,7 +920,7 @@ int main() {
 								if (saveScore) {
 									saveScore = false;
 									al_play_sample(click, 1.0f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
-									printf("SCORE SAVE\n");
+									printf("SCORE SAVE\n", NULL);
 									switch (playerPodiumPosition) {
 									case 5:
 										podiumScore[5] = balance + bet;
@@ -1035,10 +1064,10 @@ int main() {
 									}
 									fclose(fp1);
 
-									layout = 1;
+									layout = 5;
 								}
 								else {
-									layout = 1;
+									layout = 5;
 									al_play_sample(click, 1.0f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
 								}
 							}
@@ -1127,7 +1156,7 @@ int main() {
 
 			}
 		}
-
+		
 	//Instructions layout
 		if (layout == 3) {
 			al_draw_bitmap(instructionsBackground, 0, 0, NULL);
@@ -1142,11 +1171,19 @@ int main() {
 			if (events.type == ALLEGRO_EVENT_KEY_DOWN) {
 				if (events.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
 					layout = 1;
+					al_play_sample(click, 1.0f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
 					printf("Layout: 1\n", NULL);
 				}
 			}
+			else if (events.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+				exitGame(display, layoutPtr, gameDonePtr);
+			}
+			else if (events.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN && events.mouse.button & 1) {
+				layout = 1;
+				al_play_sample(click, 1.0f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
+			}
 		}
-
+		
 	//Race layout
 		if (layout == 4) {
 			bool race = true;
@@ -1155,6 +1192,11 @@ int main() {
 			float hVelocity[6] = { 2.5, 2.5, 2.5, 2.5, 2.5, 2.5}; //Horses velocity
 			int closestHorse;
 			float offset = 0;
+
+			statTotalRaces++;
+			if (bet > statHighestBet) {
+				statHighestBet = bet;
+			}
 
 			//Animation variables
 			float hSourceX[6], hSourceY[6];
@@ -1212,15 +1254,20 @@ int main() {
 						}
 					}
 				}
-				
-				if (events.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
+				else if (events.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+					exitGame(display, layoutPtr, gameDonePtr);
+				}
+				else if (events.type == ALLEGRO_EVENT_MOUSE_BUTTON_DOWN) {
 					if (events.mouse.button & 1 && !race) {
-						layout = 2;
-						printf("Layout: 2\n", NULL);
+						if (!bankruptcy) {
+							layout = 2;
+						}
+						else {
+							layout = 5;
+						}
 					}
 				}
 
-				
 				if (events.type == ALLEGRO_EVENT_TIMER) {
 					if (race) {
 						//Every FPS events
@@ -1254,8 +1301,7 @@ int main() {
 						}
 						//Horses animation timers
 						else if (events.timer.source == h00Timer) {
-							hDraw[0] = true;
-							
+							hDraw[0] = true;	
 						}
 						else if (events.timer.source == h01Timer) {
 							hDraw[1] = true;
@@ -1310,8 +1356,13 @@ int main() {
 
 								printf("***Horse0%i wins!***\n", i + 1);
 								if (i == betHorse) {
-									balance += possibleProfit;
+									statMoneyWon += possibleProfit;
+									statRacesWon++;
+									if (possibleProfit > statHighestWin) {
+										statHighestWin = possibleProfit;
+									}
 
+									balance += possibleProfit;
 									
 									//al_play_sample(cheer, 2.0f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
 									al_play_sample(cashSound, 1.0f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
@@ -1322,6 +1373,16 @@ int main() {
 								else {
 									al_draw_text(font60, al_map_rgb(174, 0, 0), 120.0f + offset, 27.0f, ALLEGRO_ALIGN_LEFT, "YOU LOST");
 									al_play_sample(failSound, 0.9f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
+
+									statMoneyLost += bet;
+									statRacesLost++;
+									if (bet > statHighestLoss) {
+										statHighestLoss = bet;
+									}
+
+									if (balance <= 0) {
+										bankruptcy = true;
+									}
 								}
 
 								break;
@@ -1475,13 +1536,86 @@ int main() {
 						//al_draw_bitmap(box6, 20, bPosY[5], NULL);
 
 						//END OF HORSES ANIMATION
-						
+					
+						if (bankruptcy) {
+							puts("Bank");
+							al_draw_bitmap(blackout, 0 + offset, 0, NULL);
+							al_draw_bitmap(blackout, 0 + offset, 0, NULL);
+							al_draw_text(font60, al_map_rgb(100, 0, 0), 320.0f + offset + 2, 160.0f + 2, ALLEGRO_ALIGN_CENTER, "BANKRUPTCY!");
+							al_draw_text(font60, al_map_rgb(255, 0, 0), 320.0f + offset, 160.0f, ALLEGRO_ALIGN_CENTER, "BANKRUPTCY!");
+						}
+
 					}
 
 					al_flip_display();
 				}				
 			}
 		}
+
+	//End Career layout
+		if (layout == 5) {
+			puts(">LAYOUT 5\n");
+
+			if (statRacesWon + statRacesLost > 0) {
+				statAccuracy = statRacesWon * 100 / (statRacesWon + statRacesLost);
+			}
+			else {
+				statAccuracy = 0;
+			}
+
+			//Set camera to default position
+			al_identity_transform(&camera);
+			al_translate_transform(&camera, 0, 0);
+			al_use_transform(&camera);
+
+			while (layout == 5) {
+				if (events.type == ALLEGRO_EVENT_TIMER) {
+					draw = true;
+				}
+
+				al_wait_for_event(event_queue, &events);
+				if (events.type == ALLEGRO_EVENT_KEY_DOWN) {
+					if (events.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
+						layout = 1;
+						al_play_sample(click, 1.0f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
+					}
+				}
+				else if (events.type == ALLEGRO_EVENT_DISPLAY_CLOSE) {
+					exitGame(display, layoutPtr, gameDonePtr);
+				}
+
+				if (draw) {
+					draw = false;
+
+					al_draw_bitmap(endCareerBackground, 0, 0, NULL);
+					al_draw_textf(font60, al_map_rgb(152, 109, 5), 450.0f + 2, 46.0f + 2, ALLEGRO_ALIGN_CENTER, "%u", balance);
+					al_draw_textf(font60, al_map_rgb(172, 129, 25), 450.0f, 46.0f, ALLEGRO_ALIGN_CENTER, "%u", balance);
+
+					al_draw_textf(font30, al_map_rgb(0, 0, 0), 170.0f, 147.0f, ALLEGRO_ALIGN_CENTER, "%u", statTotalRaces);
+					al_draw_textf(font30, al_map_rgb(0, 0, 0), 360.0f, 147.0f, ALLEGRO_ALIGN_CENTER, "%u", statHighestBet);
+					al_draw_textf(font30, al_map_rgb(0, 0, 0), 510.0f, 147.0f, ALLEGRO_ALIGN_CENTER, "%.1f", statAccuracy);
+
+					al_draw_textf(font25, al_map_rgb(68, 124, 50), 190.0f, 203.0f, ALLEGRO_ALIGN_CENTER, "%u", statMoneyWon);
+					al_draw_textf(font25, al_map_rgb(121, 0, 0), 450.0f, 203.0f, ALLEGRO_ALIGN_CENTER, "%u", statMoneyLost);
+
+					al_draw_textf(font20, al_map_rgb(68, 124, 50), 190.0f, 246.0f, ALLEGRO_ALIGN_CENTER, "%.0f", statRacesWon);
+					al_draw_textf(font20, al_map_rgb(121, 0, 0), 450.0f, 246.0f, ALLEGRO_ALIGN_CENTER, "%.0f", statRacesLost);
+
+					al_draw_textf(font18, al_map_rgb(68, 124, 50), 190.0f, 284.0f, ALLEGRO_ALIGN_CENTER, "%u", statHighestWin);
+					al_draw_textf(font18, al_map_rgb(121, 0, 0), 450.0f, 284.0f, ALLEGRO_ALIGN_CENTER, "%u", statHighestLoss);
+
+					al_draw_text(font20, al_map_rgb(63, 115, 87), 320.0f, 328.0f, ALLEGRO_ALIGN_CENTER, "Click esc to continue...");
+					
+
+					al_flip_display();
+				}
+			}
+		}
+
+
+
+
+
 
 	}
 
@@ -1587,4 +1721,12 @@ void makeHorseSound(ALLEGRO_SAMPLE *horseSound) {
 	}
 
 	al_play_sample(horseSound, 1.0f, 0, 1.0f, ALLEGRO_PLAYMODE_ONCE, 0);
+}
+
+void exitGame(ALLEGRO_DISPLAY *display, int *layout, bool *gameDone) {
+	if (al_show_native_message_box(display, "EXIT GAME", "You are about to exit the game", "Are you sure?", NULL, ALLEGRO_MESSAGEBOX_YES_NO) == 1){
+		*layout = -1;
+		*gameDone = true;
+		puts("Exit true");
+	}
 }
